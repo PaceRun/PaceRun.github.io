@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pace: Run — Custom Interval Training & GPS Tracking</title>
+  <meta name="description" content="Design and run custom interval programs with GPS tracking and audio coaching. Free for Android." />
+  <meta property="og:title" content="Pace: Run" />
+  <meta property="og:description" content="Design and run custom interval programs with GPS tracking and audio coaching." />
+  <meta property="og:image" content="icon.png" />
+  <link rel="icon" href="icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --purple: #7C4DFF;
+      --purple-light: #A066FF;
+      --purple-dark: #4A2DB0;
+      --purple-glow: rgba(124,77,255,0.25);
+      --bg: #080612;
+      --bg2: #0f0d1e;
+      --bg3: #141228;
+      --text: #f0ecff;
+      --muted: #8b84a8;
+      --border: rgba(124,77,255,0.2);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ─────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 40px;
+      background: rgba(8,6,18,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .nav-logo img {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+    }
+
+    .nav-logo span {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--purple);
+      color: #fff !important;
+      padding: 8px 20px;
+      border-radius: 8px;
+      transition: background 0.2s !important;
+    }
+
+    .nav-cta:hover { background: var(--purple-light) !important; }
+
+    /* ── HERO ────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(124,77,255,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 60%, rgba(124,77,255,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,77,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,77,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124,77,255,0.12);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--purple-light);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--purple-light);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 22px;
+      margin: 0 auto 28px;
+      display: block;
+      box-shadow: 0 0 60px rgba(124,77,255,0.4);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--purple-light), #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      font-weight: 300;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--purple);
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 30px rgba(124,77,255,0.4);
+    }
+
+    .btn-primary:hover {
+      background: var(--purple-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(124,77,255,0.5);
+    }
+
+    .btn-primary svg { width: 20px; height: 20px; }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--purple);
+      background: rgba(124,77,255,0.06);
+    }
+
+    /* ── SCREENSHOTS ─────────────────────────────── */
+    .screenshots {
+      padding: 80px 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screenshots::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .section-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 480px;
+      margin: 0 auto 56px;
+      font-weight: 300;
+    }
+
+    .phone-scroll {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .phone-frame {
+      width: 200px;
+      flex-shrink: 0;
+      position: relative;
+      transition: transform 0.3s;
+    }
+
+    .phone-frame:hover { transform: translateY(-8px); }
+
+    .phone-frame:nth-child(2) { margin-top: 24px; }
+    .phone-frame:nth-child(3) { margin-top: 0; }
+    .phone-frame:nth-child(4) { margin-top: 32px; }
+    .phone-frame:nth-child(5) { margin-top: 12px; }
+
+    .phone-shell {
+      background: #111;
+      border-radius: 28px;
+      padding: 8px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.08),
+        0 20px 60px rgba(0,0,0,0.6),
+        0 0 40px rgba(124,77,255,0.1);
+    }
+
+    .phone-screen {
+      border-radius: 22px;
+      overflow: hidden;
+      aspect-ratio: 9/19.5;
+      background: #0a0a0a;
+    }
+
+    .phone-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      display: block;
+    }
+
+    .phone-caption {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── FEATURES ────────────────────────────────── */
+    .features {
+      padding: 80px 24px;
+      position: relative;
+    }
+
+    .features::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--purple);
+      background: var(--bg3);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 40px rgba(124,77,255,0.12);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(124,77,255,0.12);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+
+    .feature-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.2px;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* ── DOWNLOAD ────────────────────────────────── */
+    .download {
+      padding: 80px 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .download::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    }
+
+    .download-card {
+      max-width: 580px;
+      margin: 0 auto;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 52px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .download-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(124,77,255,0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .download-card img {
+      width: 80px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 24px rgba(124,77,255,0.3);
+    }
+
+    .download-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .download-card p {
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-weight: 300;
+    }
+
+    .store-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .store-btn.android {
+      background: var(--purple);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124,77,255,0.35);
+    }
+
+    .store-btn.android:hover {
+      background: var(--purple-light);
+      transform: translateY(-2px);
+    }
+
+    .store-btn.ios {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .store-btn svg { width: 22px; height: 22px; }
+
+    /* ── COMMUNITY ───────────────────────────────── */
+    .community {
+      padding: 80px 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .community::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    }
+
+    .community-card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 36px;
+    }
+
+    .community-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+
+    .community-card h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .community-card p {
+      color: var(--muted);
+      font-weight: 300;
+      margin-bottom: 28px;
+      font-size: 0.95rem;
+    }
+
+    .coming-soon-badge {
+      display: inline-block;
+      background: rgba(124,77,255,0.1);
+      border: 1px solid var(--border);
+      color: var(--purple-light);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 100px;
+    }
+
+    /* ── PRIVACY POLICY ──────────────────────────── */
+    .privacy {
+      padding: 80px 24px;
+      position: relative;
+    }
+
+    .privacy::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    }
+
+    .privacy-inner {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .privacy-inner h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .privacy-date {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 40px;
+    }
+
+    .privacy-inner h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin: 32px 0 10px;
+      color: var(--purple-light);
+    }
+
+    .privacy-inner p, .privacy-inner li {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.75;
+      font-weight: 300;
+    }
+
+    .privacy-inner ul {
+      padding-left: 20px;
+      margin-top: 8px;
+    }
+
+    .privacy-inner li { margin-bottom: 4px; }
+
+    .privacy-inner a {
+      color: var(--purple-light);
+      text-decoration: none;
+    }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    footer {
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+      gap: 16px;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .footer-logo img {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+    }
+
+    .footer-logo span {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-copy {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    /* ── ANIMATIONS ──────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 700px) {
+      nav { padding: 14px 20px; }
+      .nav-links { display: none; }
+      .phone-frame { width: 150px; }
+      .download-card { padding: 36px 24px; }
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <img src="icon.png" alt="Pace: Run icon" />
+    <span>Pace: Run</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#screenshots">Screenshots</a></li>
+    <li><a href="#community">Community</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+    <li><a href="#download" class="nav-cta">Download</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">Now available on Android</div>
+    <img src="icon.png" alt="Pace: Run" class="hero-icon" />
+    <h1>Run on your<br /><em>own terms.</em></h1>
+    <p class="hero-sub">Design custom interval programs, track your GPS route, and get real-time audio coaching — all from one app built for serious runners.</p>
+    <div class="hero-actions">
+      <a href="#download" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.37.2.8.2 1.2-.02l13.61-7.69-2.9-2.9L3.18 23.76zM.47 1.01C.18 1.42 0 2 0 2.73V21.3c0 .72.18 1.3.48 1.72l.09.08 10.42-10.42v-.25L.56.93.47 1.01zM20.46 10.26L16.99 8.3 13.8 11.5l3.18 3.18 3.49-1.97c1-.56 1-.48 0-2.45zM4.38.24L17.99 7.93l-2.9 2.9L4.38.24z"/></svg>
+        Get it on Google Play
+      </a>
+      <a href="#screenshots" class="btn-secondary">See screenshots →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── SCREENSHOTS ──────────────────────────────────────── -->
+<section class="screenshots" id="screenshots">
+  <p class="section-label reveal">In Action</p>
+  <h2 class="section-title reveal">Every screen, built for runners.</h2>
+  <p class="section-sub reveal">From building your program to reviewing your splits — everything you need, nothing you don't.</p>
+
+  <div class="phone-scroll">
+    <div class="phone-frame reveal">
+      <div class="phone-shell">
+        <div class="phone-screen">
+          <img src="ss_home.jpg" alt="Home screen" loading="lazy" />
+        </div>
+      </div>
+      <p class="phone-caption">Choose your run</p>
+    </div>
+    <div class="phone-frame reveal">
+      <div class="phone-shell">
+        <div class="phone-screen">
+          <img src="ss_preview.jpg" alt="Program preview" loading="lazy" />
+        </div>
+      </div>
+      <p class="phone-caption">Program preview</p>
+    </div>
+    <div class="phone-frame reveal">
+      <div class="phone-shell">
+        <div class="phone-screen">
+          <img src="ss_stats.jpg" alt="Live stats" loading="lazy" />
+        </div>
+      </div>
+      <p class="phone-caption">Live stats</p>
+    </div>
+    <div class="phone-frame reveal">
+      <div class="phone-shell">
+        <div class="phone-screen">
+          <img src="ss_map.jpg" alt="GPS map" loading="lazy" />
+        </div>
+      </div>
+      <p class="phone-caption">GPS tracking</p>
+    </div>
+    <div class="phone-frame reveal">
+      <div class="phone-shell">
+        <div class="phone-screen">
+          <img src="ss_history.jpg" alt="Run history" loading="lazy" />
+        </div>
+      </div>
+      <p class="phone-caption">Run history</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ─────────────────────────────────────────── -->
+<section class="features" id="features">
+  <p class="section-label reveal">Features</p>
+  <h2 class="section-title reveal">Everything a structured runner needs.</h2>
+  <p class="section-sub reveal">No subscriptions required for the core experience. Just download and run.</p>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">🏃</div>
+      <h3>Custom Interval Programs</h3>
+      <p>Build warm-ups, hard intervals, rest periods, and cool-downs with repeats. Set goals by distance, time, or both.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">📍</div>
+      <h3>GPS Tracking</h3>
+      <p>Kalman-filtered GPS for accurate distance tracking without the freeze-and-jump problem common in other apps.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔊</div>
+      <h3>Audio Coaching</h3>
+      <p>Spoken cues for segment transitions, pace alerts, and distance milestones — so your eyes stay ahead, not down.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">📊</div>
+      <h3>Segment Breakdown</h3>
+      <p>After each run, review per-segment stats: distance, time, pace, and goal performance for every interval.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🗺️</div>
+      <h3>Route Map + Markers</h3>
+      <p>See your GPS route with segment markers pinned exactly where each interval began and ended.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🏆</div>
+      <h3>Personal Records</h3>
+      <p>Automatically tracks your bests for common distances. Every PR gets flagged the moment you cross it.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🌐</div>
+      <h3>Runs Anywhere</h3>
+      <p>Background GPS tracking keeps logging even when your screen is off or you switch apps mid-run.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🆓</div>
+      <h3>Free Run Mode</h3>
+      <p>No program? No problem. Free Run tracks your route, pace, and distance with mile markers — zero setup needed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOWNLOAD ──────────────────────────────────────────── -->
+<section class="download" id="download">
+  <div class="download-card reveal">
+    <img src="icon.png" alt="Pace: Run" />
+    <h2>Download Pace: Run</h2>
+    <p>Free on Android. Start your first structured run today.</p>
+    <div class="store-buttons">
+      <a href="https://play.google.com/store" class="store-btn android">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.18 23.76c.37.2.8.2 1.2-.02l13.61-7.69-2.9-2.9L3.18 23.76zM.47 1.01C.18 1.42 0 2 0 2.73V21.3c0 .72.18 1.3.48 1.72l.09.08 10.42-10.42v-.25L.56.93.47 1.01zM20.46 10.26L16.99 8.3 13.8 11.5l3.18 3.18 3.49-1.97c1-.56 1-.48 0-2.45zM4.38.24L17.99 7.93l-2.9 2.9L4.38.24z"/></svg>
+        Google Play
+      </a>
+      <a href="#" class="store-btn ios">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        iOS — Coming Soon
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMMUNITY ─────────────────────────────────────────── -->
+<section class="community" id="community">
+  <p class="section-label reveal">Community</p>
+  <div class="community-card reveal">
+    <div class="community-icon">💬</div>
+    <h2>Join the conversation</h2>
+    <p>A community space for Pace runners is in the works. Share programs, compare splits, and help shape where the app goes next.</p>
+    <span class="coming-soon-badge">Coming Soon</span>
+    <br /><br />
+    <p style="font-size:0.82rem;">In the meantime, reach us at <a href="mailto:pacerunningapp@gmail.com">pacerunningapp@gmail.com</a></p>
+  </div>
+</section>
+
+<!-- ── PRIVACY POLICY ────────────────────────────────────── -->
+<section class="privacy" id="privacy">
+  <div class="privacy-inner">
+    <h2>Privacy Policy</h2>
+    <p class="privacy-date">Last updated: March 2026</p>
+
+    <p>Pace: Run ("the App") is developed and operated as an independent project. This Privacy Policy explains what information we collect, how we use it, and your choices regarding your data.</p>
+
+    <h3>1. Information We Collect</h3>
+    <p>We collect the following types of information when you use Pace: Run:</p>
+    <ul>
+      <li><strong>Account information:</strong> When you register, we collect your email address and a secure password hash. This is used to identify your account and sync your data across devices.</li>
+      <li><strong>Location data:</strong> The App uses your device's GPS to track your running route during active workouts. Location data is recorded only when a run is in progress and you have granted location permissions. We do not collect your location in the background outside of active runs.</li>
+      <li><strong>Run and workout data:</strong> We store records of your completed runs including distance, duration, pace, calorie estimates, GPS route coordinates, and segment performance. This data is tied to your account and synced to our secure database.</li>
+      <li><strong>Device information:</strong> We may collect basic information about your device type and operating system version for debugging and compatibility purposes.</li>
+    </ul>
+
+    <h3>2. How We Use Your Information</h3>
+    <ul>
+      <li>To provide core app functionality including GPS tracking, run logging, and program storage</li>
+      <li>To sync your data securely across sessions and devices</li>
+      <li>To calculate and display personal records and run history</li>
+      <li>To improve app performance and fix bugs</li>
+    </ul>
+    <p>We do not sell your data. We do not use your data for advertising purposes.</p>
+
+    <h3>3. Data Storage and Security</h3>
+    <p>Your account and run data are stored securely using Supabase, a cloud database provider with encryption at rest and in transit. We use industry-standard practices to protect your information. However, no method of transmission over the internet is 100% secure.</p>
+
+    <h3>4. Location Permissions</h3>
+    <p>Pace: Run requests location access ("While Using the App" and background location) to enable GPS run tracking. Background location is used only during an active run session initiated by you. You can revoke location permissions at any time through your device settings, though this will prevent GPS tracking from functioning.</p>
+
+    <h3>5. Third-Party Services</h3>
+    <p>The App uses the following third-party services:</p>
+    <ul>
+      <li><strong>Supabase</strong> — database and authentication (<a href="https://supabase.com/privacy" target="_blank">Privacy Policy</a>)</li>
+      <li><strong>OpenStreetMap / Flutter Map</strong> — map tile rendering (no personal data shared)</li>
+    </ul>
+
+    <h3>6. Data Retention and Deletion</h3>
+    <p>Your data is retained as long as your account is active. You may request deletion of your account and all associated data by emailing <a href="mailto:pacerunningapp@gmail.com">pacerunningapp@gmail.com</a>. We will process deletion requests within 30 days.</p>
+
+    <h3>7. Children's Privacy</h3>
+    <p>Pace: Run is not directed at children under 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided us with personal information, please contact us so we can delete it.</p>
+
+    <h3>8. Changes to This Policy</h3>
+    <p>We may update this Privacy Policy from time to time. We will notify users of significant changes by updating the date at the top of this page. Continued use of the App after changes constitutes acceptance of the updated policy.</p>
+
+    <h3>9. Contact</h3>
+    <p>For any questions about this Privacy Policy or your data, contact us at: <a href="mailto:pacerunningapp@gmail.com">pacerunningapp@gmail.com</a></p>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <a href="#" class="footer-logo">
+      <img src="icon.png" alt="Pace: Run" />
+      <span>Pace: Run</span>
+    </a>
+    <ul class="footer-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#screenshots">Screenshots</a></li>
+      <li><a href="#privacy">Privacy Policy</a></li>
+      <li><a href="mailto:pacerunningapp@gmail.com">Contact</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 Pace: Run. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(el => observer.observe(el));
+
+  // Update Play Store link once live
+  // Replace the href on .store-btn.android with your actual Play Store URL
+</script>
+</body>
+</html>
